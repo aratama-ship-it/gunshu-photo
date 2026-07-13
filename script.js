@@ -50,6 +50,16 @@ const CONFIG = {
     // 列の奥行き表現: 1列後ろに下がるごとに暗くする割合と、その上限
     rowShadeStep: 0.07,
     rowShadeMax: 0.4,
+    // 広角パースの歪み表現の強さ。画面端（光軸から離れた）人物が横に伸びる現象を、
+    // 水平画角θに対し stretchX = 1 + strength·(1/cos²θ − 1) で表す。
+    // 0=なし、1=幾何学的に厳密な rectilinear の伸び。端が重なりすぎない中間値が見やすい
+    edgeDistortionStrength: 0.55,
+    edgeDistortionMax: 2.0, // 伸びの上限（極端な広角でも横伸びをこの倍率で頭打ち）
+    // 歪みが気になり始める横伸び倍率。ここから警告色を混ぜ始め、warnFull で最も濃くなる
+    edgeWarnStart: 1.1,
+    edgeWarnFull: 1.45,
+    edgeWarnMaxTint: 0.85, // 警告色の最大混合率（1.0で完全に警告色）
+    warnColor: "#ff5a4d", // 歪み注意の赤
     // ピントを合わせる人物のハイライト色
     focusColor: "#ffb340",
   },
@@ -72,6 +82,7 @@ const distributionValue = document.getElementById("distributionValue");
 const distanceValue = document.getElementById("distanceValue");
 const frameWidthValue = document.getElementById("frameWidthValue");
 const dofValue = document.getElementById("dofValue");
+const warnLegend = document.getElementById("warnLegend");
 const lineupSvg = document.getElementById("lineupSvg");
 
 let sensorType = "full-frame";
@@ -171,6 +182,18 @@ function shadeColor(hex, amount) {
   return `#${channels.join("")}`;
 }
 
+// hexA → hexB を t(0〜1) で線形補間
+function mixColor(hexA, hexB, t) {
+  const channels = [1, 3, 5].map((i) => {
+    const a = parseInt(hexA.slice(i, i + 2), 16);
+    const b = parseInt(hexB.slice(i, i + 2), 16);
+    return Math.round(a + (b - a) * t)
+      .toString(16)
+      .padStart(2, "0");
+  });
+  return `#${channels.join("")}`;
+}
+
 // 1人 = 身長165cm・7頭身の一体シルエット（単色・フラット）。
 // 座標系はユニット（高さ70 ≒ 7頭 × 10）。原点 = 頭（顔）の中心。
 // 頭: 円 r5.5（頭頂 -5.5。肩幅とのバランスでやや大きめ）／
@@ -178,13 +201,14 @@ function shadeColor(hex, amount) {
 // 腰: y36・半幅7 ／ 股下 y38 から2本の脚（足元 y65）。
 // 脚の間に細い切り込みを入れて「どこまでが足か」を分かるようにしている（立体表現はしない）。
 // 頭部円弧のarcはsweep=1（0だとキャミソール形に化けるので注意）
-function personGroup(x, y, scale, isFocus = false, rowColor = CONFIG.visual.personColor) {
+// stretchX = 広角パースによる横方向の伸び（1=等倍。中心線まわりに左右対称に伸ばす）
+function personGroup(x, y, scale, isFocus = false, rowColor = CONFIG.visual.personColor, stretchX = 1) {
   const color = isFocus ? CONFIG.visual.focusColor : rowColor;
   const glow = isFocus
     ? '<circle cx="0" cy="18" r="30" fill="rgba(255,179,64,0.16)" />'
     : "";
   return `
-    <g transform="translate(${x.toFixed(2)} ${y.toFixed(2)}) scale(${scale.toFixed(4)})">
+    <g transform="translate(${x.toFixed(2)} ${y.toFixed(2)}) scale(${(scale * stretchX).toFixed(4)} ${scale.toFixed(4)})">
       ${glow}
       <ellipse cx="0" cy="66" rx="10" ry="2.6" fill="rgba(0,0,0,0.4)" />
       <path d="M -9 14
@@ -292,6 +316,7 @@ function renderLineup() {
   const rightM = Math.max(...distribution.map((c, i) => ((c - 1) / 2) * pitchM + staggers[i]));
   const centerM = (leftM + rightM) / 2;
 
+  let anyWarn = false; // 歪み警告色が付いた人物が1人でもいるか（凡例の出し分けに使う）
   distribution.forEach((rowCount, rowIndex) => {
     const y = ys[rowIndex];
     const rowScale = rowScales[rowIndex];
@@ -303,12 +328,28 @@ function renderLineup() {
     for (let index = 0; index < rowCount; index += 1) {
       const xM = (index - (rowCount - 1) / 2) * pitchM + staggers[rowIndex] - centerM;
       const x = frameWidth / 2 + xM * sharedPxPerM;
+      // パース歪み: 光軸(フレーム中央)からの水平画角θが大きいほど横に伸びる（広角で顕著）。
+      // θは方向だけで決まるので前列基準の距離を使い、同じ列(同じ画面位置)は同じ伸びで揃える。
+      // realXm は表示圧縮(fitRatio)を戻した実際の横位置
+      const realXm = Math.abs(xM) / fitRatio;
+      const theta = Math.atan(realXm / distanceM);
+      const stretchX = Math.min(
+        visual.edgeDistortionMax,
+        1 + visual.edgeDistortionStrength * (1 / Math.cos(theta) ** 2 - 1)
+      );
+      // 歪みが強い人物は警告色(赤)を混ぜる。warnStart〜warnFull で 0→最大混合率
+      const warnT =
+        (stretchX - visual.edgeWarnStart) / (visual.edgeWarnFull - visual.edgeWarnStart);
+      const warnAmount = Math.max(0, Math.min(1, warnT)) * visual.edgeWarnMaxTint;
+      if (warnAmount > 0) anyWarn = true;
       const isFocus = rowIndex === focusRowIndex && index === Math.round((rowCount - 1) / 2);
-      svg += personGroup(x, y, rowScale, isFocus, rowColor);
+      const bodyColor = warnAmount > 0 ? mixColor(rowColor, visual.warnColor, warnAmount) : rowColor;
+      svg += personGroup(x, y, rowScale, isFocus, bodyColor, stretchX);
     }
   });
 
   replaceSvgContent(svg);
+  warnLegend.hidden = !anyWarn; // 歪み注意の凡例は、警告色が付いたときだけ出す
   peopleValue.value = `${count}人`;
   distanceControlValue.value = `${distanceM.toFixed(1)}m`;
   focalControlValue.value = `${focalMm}mm`;

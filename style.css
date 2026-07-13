@@ -307,13 +307,18 @@ body {
 }
 
 .frame-legend {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 20px;
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: 0.12em;
   color: var(--text-dim);
+  pointer-events: none;
 }
 
 .legend-item {
@@ -328,6 +333,22 @@ body {
   border-radius: 50%;
   background: var(--amber);
   box-shadow: 0 0 8px rgba(255, 179, 64, 0.8);
+}
+
+.warn-mark {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ff5a4d;
+  box-shadow: 0 0 8px rgba(255, 90, 77, 0.85);
+}
+
+.warn-legend[hidden] {
+  display: none;
+}
+
+.warn-legend {
+  color: #ff8b82;
 }
 
 /* ---------- Controls ---------- */

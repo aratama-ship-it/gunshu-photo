@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260713m">
+    <link rel="stylesheet" href="style.css?v=20260713p">
   </head>
   <body>
     <main class="phone-shell" aria-label="集合写真アシスタント">
@@ -54,12 +54,16 @@
           </div>
           <div class="photo-frame">
             <svg id="lineupSvg" class="lineup-svg" viewBox="0 0 520 347" role="img" aria-label="横位置集合写真の人物配置"></svg>
-          </div>
-          <div class="frame-legend">
-            <span class="legend-item">
-              <span class="focus-mark" aria-hidden="true"></span>
-              <span>ピント位置</span>
-            </span>
+            <div class="frame-legend">
+              <span class="legend-item">
+                <span class="focus-mark" aria-hidden="true"></span>
+                <span>ピント位置</span>
+              </span>
+              <span class="legend-item warn-legend" id="warnLegend" hidden>
+                <span class="warn-mark" aria-hidden="true"></span>
+                <span>歪み注意</span>
+              </span>
+            </div>
           </div>
         </section>
 
@@ -114,6 +118,6 @@
       </section>
     </main>
 
-    <script src="script.js?v=20260713l"></script>
+    <script src="script.js?v=20260713p"></script>
   </body>
 </html>
