@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>集合写真アシスタント 並び方モック</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=20260713m">
+  </head>
+  <body>
+    <main class="phone-shell" aria-label="集合写真アシスタント">
+      <section class="app-screen">
+        <header class="top-bar">
+          <div>
+            <p class="eyebrow">GROUP PHOTO ASSISTANT</p>
+            <h1>集合写真</h1>
+          </div>
+          <button class="gear-button" type="button" aria-label="機材設定">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="3.2"></circle>
+              <path d="M19.4 15a1.6 1.6 0 0 0 .32 1.77l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.6 1.6 0 0 0-1.77-.32 1.6 1.6 0 0 0-.97 1.47V21a2 2 0 1 1-4 0v-.09a1.6 1.6 0 0 0-1.05-1.47 1.6 1.6 0 0 0-1.77.32l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.6 1.6 0 0 0 .32-1.77 1.6 1.6 0 0 0-1.47-.97H3a2 2 0 1 1 0-4h.09a1.6 1.6 0 0 0 1.47-1.05 1.6 1.6 0 0 0-.32-1.77l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.6 1.6 0 0 0 1.77.32h.09a1.6 1.6 0 0 0 .97-1.47V3a2 2 0 1 1 4 0v.09a1.6 1.6 0 0 0 .97 1.47 1.6 1.6 0 0 0 1.77-.32l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.6 1.6 0 0 0-.32 1.77v.09a1.6 1.6 0 0 0 1.47.97H21a2 2 0 1 1 0 4h-.09a1.6 1.6 0 0 0-1.47.97z"></path>
+            </svg>
+          </button>
+        </header>
+
+        <section class="hero-panel" aria-label="推奨撮影設定">
+          <div class="hero-main">
+            <span class="hero-label">推奨絞り</span>
+            <strong class="hero-value" id="apertureValue">F8</strong>
+            <span class="hero-min" id="apertureMinValue">最低 F4 +1段</span>
+          </div>
+          <div class="hero-subs">
+            <div class="hero-sub">
+              <span>列</span>
+              <strong id="rowValue">3</strong>
+            </div>
+            <div class="hero-sub">
+              <span>奥行き</span>
+              <strong id="depthValue">1.4m</strong>
+            </div>
+            <div class="hero-sub">
+              <span>換算</span>
+              <strong id="distanceValue">35mm</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="preview-panel" aria-label="並び方プレビュー">
+          <div class="frame-header">
+            <span class="frame-title">画角・並びプレビュー</span>
+            <strong class="density-badge" id="densityValue" data-level="ok">余裕あり</strong>
+          </div>
+          <div class="photo-frame">
+            <svg id="lineupSvg" class="lineup-svg" viewBox="0 0 520 347" role="img" aria-label="横位置集合写真の人物配置"></svg>
+          </div>
+          <div class="frame-legend">
+            <span class="legend-item">
+              <span class="focus-mark" aria-hidden="true"></span>
+              <span>ピント位置</span>
+            </span>
+          </div>
+        </section>
+
+        <section class="control-panel" aria-label="人数調整">
+          <div class="control-heading">
+            <label for="peopleSlider">人数</label>
+            <output id="peopleValue" for="peopleSlider">30人</output>
+          </div>
+          <input id="peopleSlider" type="range" min="1" max="200" value="80" step="1">
+          <div class="slider-scale" aria-hidden="true">
+            <span>1</span>
+            <span>100</span>
+            <span>200</span>
+          </div>
+        </section>
+
+        <section class="control-panel compact-controls" aria-label="画角と距離">
+          <div class="segmented" role="group" aria-label="センサーサイズ">
+            <button class="segment active" id="fullFrameButton" type="button">フルサイズ</button>
+            <button class="segment" id="apscButton" type="button">APS-C</button>
+          </div>
+          <div class="mini-control">
+            <div class="control-heading small">
+              <label for="distanceSlider">被写体距離</label>
+              <output id="distanceControlValue" for="distanceSlider">8.0m</output>
+            </div>
+            <input id="distanceSlider" type="range" min="3" max="30" value="8" step="0.5">
+          </div>
+          <div class="mini-control">
+            <div class="control-heading small">
+              <label for="focalSlider">焦点距離</label>
+              <output id="focalControlValue" for="focalSlider">35mm</output>
+            </div>
+            <input id="focalSlider" type="range" min="16" max="85" value="35" step="1">
+          </div>
+        </section>
+
+        <section class="layout-summary" aria-label="並び方詳細">
+          <div class="summary-wide">
+            <span>並び（前→後）</span>
+            <strong id="distributionValue">10 / 10 / 10</strong>
+          </div>
+          <div>
+            <span>画角幅</span>
+            <strong id="frameWidthValue">8.2m</strong>
+          </div>
+          <div>
+            <span>ピントが合う範囲</span>
+            <strong id="dofValue">6.1〜9.2m</strong>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="script.js?v=20260713l"></script>
+  </body>
+</html>

@@ -1,0 +1,4 @@
+# 開発用アーティファクト（公開サイトには不要）
+render_preview.py
+ui-preview.png
+.DS_Store
